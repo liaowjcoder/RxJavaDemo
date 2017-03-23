@@ -6,10 +6,13 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.jakewharton.retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
+
+import io.reactivex.Observer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 import okhttp3.OkHttpClient;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
@@ -28,43 +31,56 @@ public class MainActivity extends AppCompatActivity {
         mButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getMovieByRetrofit();
-                //getMovieByRxJava();
+                //                getMovieByRetrofit();
+                getMovieByRxJava();
             }
         });
 
     }
 
-    private void getMovieByRetrofit() {
+    private void getMovieByRxJava() {
 
         String baseUrl = "https://api.douban.com/v2/movie/";
 
         OkHttpClient okHttpClient = new OkHttpClient.Builder().build();
 
-        Retrofit retrofit = new Retrofit.Builder().baseUrl(baseUrl).client(okHttpClient)
-                .addConverterFactory(GsonConverterFactory.create()).build();
+        //这样一来我们定义的service返回值就不在是一个Call了，而是一个Observable
+        Retrofit retrofit = new Retrofit.Builder().baseUrl(baseUrl)//.client(okHttpClient)
+                .addConverterFactory(GsonConverterFactory.create())
+                .addCallAdapterFactory
+                        (RxJava2CallAdapterFactory.create())
+                .build();
 
 
         MovieApiService movieApiService = retrofit.create(MovieApiService.class);
 
-        Call<MovieEntity> movie = movieApiService.getMovie(0, 10);
 
-        movie.enqueue(new Callback<MovieEntity>() {
+        movieApiService.getMovieByRxJava(0, 10).subscribeOn(Schedulers.io()).observeOn
+                (AndroidSchedulers.mainThread()).subscribe(new Observer<MovieEntity>() {
             @Override
-            public void onResponse(Call<MovieEntity> call, Response<MovieEntity> response) {
-                mTextView.setText(response.message());
+            public void onSubscribe(Disposable d) {
+
             }
 
             @Override
-            public void onFailure(Call<MovieEntity> call, Throwable t) {
-                mTextView.setText(t.getMessage());
+            public void onNext(MovieEntity value) {
+                mTextView.setText(value.toString());
+            }
+
+            @Override
+            public void onError(Throwable e) {
+                mTextView.setText(e.getMessage());
+            }
+
+            @Override
+            public void onComplete() {
+
             }
         });
 
-
     }
 
-//    private void getMovieByRxJava() {
+//    private void getMovieByRetrofit() {
 //
 //        String baseUrl = "https://api.douban.com/v2/movie/";
 //
@@ -89,4 +105,5 @@ public class MainActivity extends AppCompatActivity {
 //                mTextView.setText(t.getMessage());
 //            }
 //        });
+//    }
 }

@@ -1,6 +1,6 @@
 package com.zeal;
 
-import retrofit2.Call;
+import io.reactivex.Observable;
 import retrofit2.http.GET;
 import retrofit2.http.Query;
 
@@ -13,7 +13,10 @@ import retrofit2.http.Query;
 public interface MovieApiService {
 
 
+//    @GET("top250")
+//    Call<MovieEntity> getMovie(@Query("start") int start, @Query("count") int count);
+    //rxjava 版本
     @GET("top250")
-    Call<MovieEntity> getMovie(@Query("start") int start, @Query("count") int count);
+    Observable<MovieEntity> getMovieByRxJava(@Query("start") int start, @Query("count") int count);
 
 }
