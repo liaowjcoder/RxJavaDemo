@@ -1,1 +1,1 @@
-include ':app', ':retrofitdemo', ':rxjavademo1.0', ':mydemo'
+include ':app', ':retrofitdemo', ':rxjavademo1.0', ':mydemo', ':rxjava_retrofit_demo'
