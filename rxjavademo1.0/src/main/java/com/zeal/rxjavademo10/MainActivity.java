@@ -2,14 +2,19 @@ package com.zeal.rxjavademo10;
 
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.ImageView;
+
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
 
 import rx.Observable;
 import rx.Observer;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.functions.Func2;
 
@@ -75,7 +80,7 @@ public class MainActivity extends AppCompatActivity {
 
         Observable.just(1, 1, 1);
 
-        Observable.from(new String[] {});
+        Observable.from(new String[]{});
     }
 
     public void demo3() {
@@ -194,21 +199,59 @@ public class MainActivity extends AppCompatActivity {
             }
         }).observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<Integer>() {
-            @Override
-            public void onCompleted() {
-                Log.e("zeal", "onCompleted");
-            }
+                    @Override
+                    public void onCompleted() {
+                        Log.e("zeal", "onCompleted");
+                    }
 
-            @Override
-            public void onError(Throwable e) {
-                Log.e("zeal", "onError");
-            }
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.e("zeal", "onError");
+                    }
 
+                    @Override
+                    public void onNext(Integer s) {
+                        Log.e("zeal", "onNext:" + s);
+                    }
+                });
+
+    }
+
+    public void demo7() {
+        Observable.create(new Observable.OnSubscribe<String>() {
             @Override
-            public void onNext(Integer s) {
-                Log.e("zeal", "onNext:" + s);
+            public void call(Subscriber<? super String> subscriber) {
+
             }
         });
+        Observable.zip(create(1, 2, 3), create(4, 5, 6), new Func2<String, String, String>() {
 
+            @Override
+            public String call(String s, String s2) {
+                return null;
+            }
+        }).subscribe(new Action1<String>() {
+            @Override
+            public void call(String s) {
+
+            }
+        });
+    }
+
+    public Observable<String> create(final int... args) {
+        return Observable.create(new Observable.OnSubscribe<String>() {
+            @Override
+            public void call(Subscriber<? super String> subscriber) {
+                for (int i = 0; i < args.length; i++) {
+                    Log.e("zeal", "onNext:" + args[i]);
+                    subscriber.onNext("" + args[i]);
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
     }
 }
